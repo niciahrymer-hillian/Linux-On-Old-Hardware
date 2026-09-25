@@ -1,9 +1,727 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Linux-On-Old-Hardware — Tour</title>
-<style>body{margin:0;font-family:-apple-system,sans-serif;background:#0d0d12;color:#e6e6e6}
-header{padding:18px 24px;border-bottom:1px solid #ffffff14}main{display:grid;grid-template-columns:1fr 1fr;min-height:60vh}
-.lesson,.practice{padding:24px}.lesson{border-right:1px solid #ffffff14}h1,h2{color:#64748B}
-textarea{width:100%;min-height:240px;background:#0000005c;color:#e6e6e6;border:1px solid #ffffff1a;border-radius:8px;padding:12px;font-family:ui-monospace,monospace}</style></head>
-<body><header><h1>Linux-On-Old-Hardware — Interactive Tour (TODO)</h1><p>4-lesson split-panel tour scaffold + Check Your Understanding quiz. See docs/LESSON_PLAN.md.</p></header>
-<main><section class="lesson"><h2>Lesson 1 — TODO</h2><p>Concept + diagram on the left.</p></section>
-<section class="practice"><h3>Practice (TODO)</h3><textarea>// TODO starter code</textarea></section></main></body></html>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Linux On Old Hardware &mdash; Interactive Tour</title>
+<style>
+  :root { --bg:#0e1116; --accent:#94a3b8; --accent-deep:#64748B; --panel:#0000002e;
+          --text:#e6e6e6; --muted:#9aa0a6; --good:#4ade80; --bad:#f87171; --warn:#fbbf24; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);line-height:1.55}
+  header{padding:18px 24px;border-bottom:1px solid #ffffff14}
+  header h1{margin:0;font-size:20px;color:var(--accent)}
+  header p{margin:6px 0 0;color:var(--muted);font-size:13px}
+  header .persist-note{margin-top:4px;font-size:11px;color:var(--muted);opacity:.8}
+  .badge{display:inline-block;background:var(--accent-deep);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:8px}
+  .pills{display:flex;gap:6px;flex-wrap:wrap;padding:12px 24px;border-bottom:1px solid #ffffff14}
+  .pill{font-size:12px;padding:4px 10px;border:1px solid #ffffff22;border-radius:999px;color:var(--muted);cursor:pointer;background:transparent}
+  .pill.active{background:var(--accent);color:#0e1116;font-weight:600;border-color:var(--accent)}
+  .pill.done{border-color:var(--good);color:var(--good)}
+  .pill.tool{border-style:dashed}
+  main{display:grid;grid-template-columns:1fr 1fr;min-height:60vh}
+  @media (max-width:880px){main{grid-template-columns:1fr}.lesson{border-right:none!important;border-bottom:1px solid #ffffff14}}
+  .lesson,.practice{padding:22px 24px}
+  .lesson{border-right:1px solid #ffffff14}
+  .lesson h2{color:var(--accent);margin-top:0;font-size:18px}
+  .lesson ul{padding-left:18px}.lesson li{margin:6px 0}
+  .trap{border-left:3px solid var(--warn);background:#fbbf2410;padding:10px 12px;border-radius:4px;margin:12px 0;font-size:14px}
+  .trap b{color:var(--warn)}
+  .worked{border-left:3px solid var(--accent-deep);background:#ffffff08;padding:10px 12px;border-radius:4px;margin:12px 0;font-size:14px}
+  figure{margin:14px 0}figcaption{color:var(--muted);font-size:12px;margin-top:6px}
+  .practice h3{margin-top:0;color:var(--accent);font-size:16px}
+  .nav{display:flex;gap:10px;align-items:center;padding:14px 24px;border-top:1px solid #ffffff14}
+  button{font:inherit}
+  button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer}
+  button.ghost:disabled{opacity:.35;cursor:not-allowed}
+  .counter{color:var(--muted);font-size:13px;margin-left:auto}
+  .qc{margin-top:16px;border-top:1px solid #ffffff14;padding-top:14px}
+  .qc h4{margin:0 0 8px;font-size:14px;color:var(--accent)}
+  .opt{all:unset;display:flex;align-items:center;gap:8px;padding:8px 10px;margin:4px 0;border:1px solid #ffffff1a;border-radius:8px;cursor:pointer;font-size:14px}
+  .opt:hover{border-color:var(--accent)}
+  .opt.correct{border-color:var(--good);background:#4ade8018}
+  .opt.wrong{border-color:var(--bad);background:#f8717118}
+  .opt[disabled]{cursor:default}
+  .explain{display:none;margin-top:8px;font-size:13px;color:var(--muted);border-left:2px solid var(--accent-deep);padding-left:10px}
+  .links{margin-top:14px;font-size:13px}
+  .links a{color:var(--accent);display:inline-block;margin:3px 0}
+  .links .kind{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-right:6px}
+  .video-card{display:flex;gap:10px;align-items:center;border:1px solid #ffffff1a;border-radius:8px;padding:8px;text-decoration:none;color:var(--text);margin-top:6px}
+  .video-card:hover{border-color:var(--accent)}
+  .video-card-thumb{width:96px;height:54px;border-radius:4px;background-size:cover;background-position:center;position:relative;flex-shrink:0}
+  .video-card-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;text-shadow:0 0 6px #000}
+  .video-card-info b{display:block;font-size:13px}
+  .video-card-info span{color:var(--muted);font-size:12px}
+  table.cheat{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}
+  table.cheat td,table.cheat th{border:1px solid #ffffff14;padding:6px 8px;text-align:left}
+  table.cheat th{color:var(--accent)}
+  code{background:#ffffff12;padding:1px 5px;border-radius:3px;font-family:ui-monospace,monospace;font-size:13px}
+  .quiz-wrap{padding:22px 24px;border-top:1px solid #ffffff14}
+  .q{margin-bottom:18px}.q p{font-weight:600;margin:0 0 6px}
+  #score{font-weight:700;color:var(--accent)}
+  .flash-stage{display:flex;justify-content:center;padding:18px 0;perspective:1200px}
+  .flash-card{width:min(420px,90%);height:190px;position:relative;cursor:pointer;transform-style:preserve-3d;transition:transform .45s}
+  .flash-card.flipped{transform:rotateY(180deg)}
+  .flash-face{position:absolute;inset:0;backface-visibility:hidden;border:1px solid #ffffff22;border-radius:12px;
+              display:flex;align-items:center;justify-content:center;text-align:center;padding:18px;font-size:16px}
+  .flash-front{background:#ffffff08;color:var(--text);font-weight:700}
+  .flash-back{background:var(--accent-deep);color:#fff;transform:rotateY(180deg);font-size:14px;font-weight:400}
+  .flash-controls{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:8px}
+  .match-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .match-col{display:flex;flex-direction:column;gap:8px}
+  .match-btn{all:unset;padding:10px 12px;border:1px solid #ffffff1a;border-radius:8px;cursor:pointer;font-size:13px;text-align:left}
+  .match-btn:hover{border-color:var(--accent)}
+  .match-btn.sel{border-color:var(--accent);background:#94a3b818}
+  .match-btn.matched{border-color:var(--good);background:#4ade8018;opacity:.55;cursor:default}
+  .match-btn.wrong{border-color:var(--bad);background:#f8717118}
+  .term-wrap{border:1px solid #ffffff1a;border-radius:8px;margin-top:10px;background:#000;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+  .term-log{height:320px;overflow-y:auto;padding:12px 14px}
+  .term-line{white-space:pre-wrap;margin:2px 0}
+  .term-line.cmd{color:#e6e6e6}
+  .term-line.cmd::before{content:"$ ";color:var(--good)}
+  .term-line.out{color:#94a3b8}
+  .term-line.hint{color:var(--warn)}
+  .term-line.ok{color:var(--good)}
+  .term-input-row{display:flex;align-items:center;border-top:1px solid #ffffff14;padding:8px 14px}
+  .term-input-row span{color:var(--good);margin-right:6px}
+  .term-input-row input{flex:1;background:transparent;border:0;outline:0;color:#e6e6e6;font-family:inherit;font-size:13px}
+  .report-card{border:1px solid #ffffff22;border-radius:10px;padding:20px 22px;max-width:560px}
+  .report-card h4{margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .report-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #ffffff10;font-size:14px}
+  .report-row .grade{font-weight:700}
+  .grade-A{color:var(--good)} .grade-B{color:#a3e635} .grade-C{color:var(--warn)} .grade-D,.grade-F{color:var(--bad)} .grade-dash{color:var(--muted)}
+  .report-overall{display:flex;align-items:baseline;gap:10px;margin:14px 0}
+  .report-overall .big{font-size:40px;font-weight:800}
+  #printBtn{margin-top:16px}
+  @media print{
+    header .persist-note, .pills, #nav, .report-card #printBtn{display:none!important}
+    body{background:#fff;color:#111}
+    .report-card{border-color:#ccc;max-width:none}
+    .report-row{border-bottom-color:#ddd}
+  }
+</style></head>
+<body>
+<header>
+  <h1>Linux On Old Hardware <span class="badge">Chain K &middot; Hands-on</span></h1>
+  <p>Choosing a distro &amp; installing &rarr; command line fundamentals &rarr; systemd services &rarr;
+     resource pressure &amp; boot recovery. Practice service auditing, memory-pressure diagnosis, and
+     chroot-based recovery in the Terminal Simulator tab before a real machine's boot is on the line.</p>
+  <p class="persist-note">Progress (quick checks, quiz score, flashcards known) saves in this browser
+     only &mdash; localStorage, not an account. Clearing site data or switching browsers resets it.</p>
+</header>
+
+<div class="pills" id="pills"></div>
+
+<main>
+  <section class="lesson" id="lesson"></section>
+  <section class="practice" id="practice"></section>
+</main>
+
+<div class="nav" id="nav">
+  <button class="ghost" id="prev">&larr; Previous</button>
+  <button class="ghost" id="next">Next &rarr;</button>
+  <span class="counter" id="counter"></span>
+</div>
+
+<div class="quiz-wrap" id="quizWrap" style="display:none">
+  <h3 style="color:var(--accent);margin-top:0">Check Your Understanding</h3>
+  <div id="quiz"></div>
+  <p>Score: <span id="score">0</span> / <span id="total"></span></p>
+</div>
+
+<div class="quiz-wrap" id="toolWrap" style="display:none"></div>
+
+<script>
+const LESSONS = [
+{
+  short:"Distro & install",
+  title:"Choosing a distro deliberately, and installing under constraints",
+  body:`<p>Old hardware is the best Linux teacher because you can't be careless with resources — every
+  choice here has a visible cost.</p>
+  <ul><li><b>Lightweight distros</b> worth knowing: Debian's minimal net-install (no bloat by default),
+  Xubuntu (XFCE desktop, far lighter than GNOME/KDE), Alpine (musl libc + busybox, extremely minimal —
+  common in containers, but has real compatibility quirks for desktop use since musl isn't 100%
+  glibc-compatible).</li>
+  <li>The desktop environment choice matters more than the distro name. A full desktop environment can
+  idle at well over a gigabyte of RAM before you've opened a single application — on a machine with 2-4GB
+  total, that's a huge fraction gone before you start.</li></ul>
+  <div class="trap"><b>The trap — a listed Common Mistake:</b> installing a heavy desktop environment on
+  limited RAM. GNOME or KDE's baseline idle usage alone can consume 40-50%+ of total RAM on a 2GB
+  machine — XFCE, LXQt, or a bare window manager (i3, Openbox) uses a fraction of that, leaving real
+  headroom for actual work instead of just running the desktop itself.</div>
+  <div class="worked"><b>Worked:</b> the same physical machine that "felt too slow" running a full
+  desktop OS often runs perfectly well once the OS overhead itself is the thing that changes — this is
+  the entire premise of reviving old hardware: the hardware was rarely the real bottleneck.</div>`,
+  practice:`<h3>Practice — assess before installing</h3>
+  <ol><li>If you have an old machine available: check its RAM and CPU generation, then pick a distro +
+  desktop-environment combination deliberately based on that — not by default habit.</li></ol>`,
+  quick:{ q:"A machine has 2GB of RAM. What's the most direct way that choice of desktop environment affects usability here?",
+    choices:["A full DE (GNOME/KDE) can idle at 1GB+ RAM, leaving little headroom; XFCE or a bare window manager leaves much more","Desktop environment choice has no measurable effect on RAM usage","Only the distro name matters, not the desktop environment","More RAM is always used by lighter desktop environments, since they load more themes"],
+    a:0, ex:"Baseline idle RAM usage varies enormously between desktop environments — a heavy DE can consume a huge fraction of 2GB before any application is even open, while a lightweight one leaves real room to work." },
+  links:[
+    {type:"read", label:"Raspberry Pi Documentation — Remote access / SSH (same headless-administration habits apply here)", url:"https://www.raspberrypi.com/documentation/remote-access/ssh/en/"}
+  ]
+},
+{
+  short:"Command line",
+  title:"Command line fundamentals: permissions and processes",
+  body:`<p>Two habits carry most of the real risk in daily Linux use, and both are entirely preventable
+  once you understand what's actually happening.</p>
+  <ul><li><b>Permissions</b> (<code>rwx</code> for owner/group/other) are represented as octal
+  (<code>755</code>) or symbolic (<code>rwxr-xr-x</code>) notation. <code>chmod</code> changes
+  permissions; <code>chown</code> changes ownership.</li>
+  <li><b>Processes</b>: <code>ps aux</code> lists everything running. <code>kill &lt;pid&gt;</code>
+  sends <b>SIGTERM</b> by default — a polite request the process can catch and clean up after.
+  <code>kill -9 &lt;pid&gt;</code> sends <b>SIGKILL</b> — the kernel terminates it immediately, with no
+  chance to save state or clean up, a last resort rather than a default.</li></ul>
+  <div class="trap"><b>The trap — a listed Common Mistake:</b> running everything as root. Doing routine
+  work as root removes the safety net a mistake needs — a wrong <code>rm</code> or a misconfigured
+  script has nothing stopping it. The standard practice is a regular user plus <code>sudo</code> for the
+  specific commands that actually need elevation, not blanket root access.</div>
+  <div class="worked"><b>Worked:</b> a process writing to disk gets <code>kill -9</code>'d mid-write —
+  SIGKILL gives it zero opportunity to flush buffers or close files cleanly, risking a corrupted file.
+  The same process killed with plain <code>kill</code> (SIGTERM) gets the chance to shut down properly
+  first, which is why SIGKILL is the last resort, not the default habit.</div>`,
+  practice:`<h3>Practice — Terminal Simulator</h3>
+  <ol><li>Open the <b>Terminal Simulator</b> tab and work through Scenario 1 — auditing and disabling
+  unnecessary boot services.</li></ol>`,
+  quick:{ q:"What's the actual difference between `kill <pid>` and `kill -9 <pid>`?",
+    choices:["Plain kill sends SIGTERM (the process can catch it and clean up); -9 sends SIGKILL (immediate, no cleanup chance)","They're functionally identical, -9 is just faster","Plain kill only works on your own processes, -9 works on any process","-9 pauses the process instead of terminating it"],
+    a:0, ex:"SIGTERM is a polite request a well-behaved process can intercept to shut down gracefully. SIGKILL can't be caught or ignored — the kernel ends the process immediately, which is exactly why it's a last resort." },
+  links:[
+    {type:"read", label:"Raspberry Pi Documentation — Remote access / SSH", url:"https://www.raspberrypi.com/documentation/remote-access/ssh/en/"}
+  ]
+},
+{
+  short:"systemd services",
+  title:"Services with systemd: auditing what starts at boot",
+  body:`<p>Every enabled service on a resource-constrained machine is wasted RAM, CPU, and boot time if
+  it isn't actually needed — and services accumulate silently over time.</p>
+  <ul><li><b>systemd</b> manages what starts at boot via unit files and targets.
+  <code>systemctl list-unit-files --state=enabled</code> shows everything currently set to auto-start.</li>
+  <li>On a repurposed old machine, services like Bluetooth, a printer daemon (CUPS), or unused network
+  services can often be disabled entirely without any real loss.</li>
+  <li><code>systemctl disable --now &lt;service&gt;</code> does two things in one command: disables it
+  for future boots <i>and</i> stops it immediately — the same pattern from Raspberry-Pi-Tinkering's
+  <code>enable --now</code>, just the reverse direction.</li></ul>
+  <div class="trap"><b>The trap — a listed Common Mistake:</b> enabling services you don't need and
+  never checking. Packages often enable a service as an installation side effect, and nobody audits the
+  list months later. A deliberate <code>systemctl list-unit-files --state=enabled</code> pass, followed
+  by disabling what's genuinely unused, recovers real resources on constrained hardware.</div>
+  <div class="worked"><b>Worked:</b> auditing a fresh install often turns up Bluetooth and printing
+  services enabled by default even on a machine with no Bluetooth hardware or printer ever attached —
+  pure overhead, removable with one command each.</div>`,
+  practice:`<h3>Practice — Terminal Simulator</h3>
+  <ol><li>If you haven't already: finish Scenario 1 in the Terminal Simulator, disabling both flagged
+  services in the audit output.</li></ol>`,
+  quick:{ q:"What does `systemctl disable --now bluetooth.service` actually do, in one command?",
+    choices:["Prevents it from starting on future boots AND stops it running right now","Only stops it now, without affecting future boots","Only prevents future boots, without stopping the currently running instance","Uninstalls the Bluetooth software entirely"],
+    a:0, ex:"The --now flag applies the change immediately in addition to updating boot behavior — one command instead of running disable and stop separately." },
+  links:[
+    {type:"read", label:"Raspberry Pi Documentation — Remote access / SSH", url:"https://www.raspberrypi.com/documentation/remote-access/ssh/en/"}
+  ]
+},
+{
+  short:"Resource pressure & recovery",
+  title:"Diagnosing resource pressure, and recovering a machine that won't boot",
+  body:`<p>The payoff lesson: turning "this machine feels slow" or "this machine won't start" into a
+  specific, diagnosable problem instead of a mystery.</p>
+  <ul><li><b>Three tools answer three different questions:</b> <code>top</code>/<code>htop</code> — what's
+  using CPU/RAM right now; <code>df -h</code> — am I running out of disk space; <code>journalctl</code> —
+  why did something fail, from the centralized system log.</li>
+  <li><b>Swap</b> is disk used as overflow RAM when physical memory runs out. Heavy, sustained swap
+  activity is often the <i>actual</i> cause of a machine "feeling slow" — not raw CPU load — because
+  disk is dramatically slower than RAM, exactly the gap Machine-Under-The-Hood quantifies.</li>
+  <li><b>Boot recovery</b>: boot from rescue/live media, mount the broken system's root partition, then
+  <code>chroot</code> into it to fix configuration (a broken <code>fstab</code> entry, a bootloader
+  issue) using the tools inside that installation, from outside its broken boot process.</li></ul>
+  <div class="trap"><b>The trap — a listed Common Mistake:</b> no recovery plan before experimenting.
+  Always have rescue media ready and know the chroot-repair procedure <i>before</i> deliberately breaking
+  something — not after you're already locked out and improvising.</div>
+  <div class="worked"><b>Worked:</b> a broken <code>/etc/fstab</code> entry referencing a drive that no
+  longer exists can prevent boot entirely. Booting rescue media, mounting the root partition, and editing
+  <code>fstab</code> from outside the broken system fixes it in minutes — no reinstall needed.</div>`,
+  practice:`<h3>Practice — Terminal Simulator</h3>
+  <ol><li>Work through Scenario 2 (diagnosing memory pressure via top/free, then stopping the culprit
+  service) and Scenario 3 (recovering a broken boot via mount + chroot) in the simulator.</li></ol>`,
+  quick:{ q:"A machine feels sluggish and `free -h` shows heavy swap usage. What's the most direct explanation?",
+    choices:["Physical RAM is under pressure and the system is using much-slower disk as overflow memory","The CPU is overheating","The disk itself is failing","Swap usage is always irrelevant to perceived speed"],
+    a:0, ex:"Swap is disk-backed overflow memory — accessing it is dramatically slower than RAM. Heavy swap activity under memory pressure is a very common, specific cause of a machine feeling slow, distinct from CPU load." },
+  links:[
+    {type:"read", label:"Raspberry Pi Documentation — Remote access / SSH", url:"https://www.raspberrypi.com/documentation/remote-access/ssh/en/"}
+  ]
+}
+];
+
+const QUIZ = [
+ {q:"A 2GB RAM machine needs a usable desktop. Which choice most directly affects whether it stays usable?",
+  o:["Desktop environment (GNOME/KDE vs XFCE/a window manager) — baseline idle RAM usage varies enormously","The choice of terminal emulator","The wallpaper resolution","The number of virtual desktops configured"],c:0,
+  ex:"Desktop environment baseline RAM usage is the single biggest lever here — a heavy DE can consume most of 2GB idling, while a lightweight one leaves real headroom."},
+ {q:"What's the practical difference between chmod and chown?",
+  o:["chmod changes permissions (rwx); chown changes ownership (which user/group owns a file)","They do the same thing with different syntax","chmod only works on directories, chown only on files","chown changes permissions; chmod changes ownership"],c:0,
+  ex:"These are two distinct concepts: permissions (what's allowed) and ownership (who it belongs to). chmod is for the former, chown for the latter."},
+ {q:"Why is running routine work as root risky, compared to a regular user plus sudo for specific commands?",
+  o:["Root removes the safety net a mistake needs — an ordinary error has nothing stopping it from having full-system consequences","Root accounts are always compromised faster","sudo is technically incapable of elevating permissions when needed","There's no real difference in practice"],c:0,
+  ex:"A regular user account limits the blast radius of an ordinary mistake. sudo grants elevation only for the specific command that needs it, rather than operating with full privileges as a default state."},
+ {q:"What does `systemctl list-unit-files --state=enabled` actually show you?",
+  o:["Every service currently set to start automatically at boot","Every process currently running right now","The system's total memory usage","A log of recent boot failures"],c:0,
+  ex:"This command audits boot-time configuration specifically — what's set to auto-start — which is exactly what you need before disabling unnecessary services on constrained hardware."},
+ {q:"A repeated `df -h` shows a filesystem climbing toward 100% used. What question does this tool answer that `top` doesn't?",
+  o:["Whether the system is running out of disk space, as opposed to CPU/RAM pressure","How many CPU cores are installed","Which service started most recently","The system's uptime"],c:0,
+  ex:"top and df answer genuinely different questions — CPU/RAM usage per process versus disk space per filesystem. Diagnosing 'why is this slow/broken' requires knowing which tool answers which question."},
+ {q:"Heavy sustained swap usage is often the real explanation for a machine 'feeling slow.' Why specifically?",
+  o:["Swap uses disk as overflow memory, and disk access is dramatically slower than RAM","Swap usage always indicates a virus or malware","Swap is only relevant to servers, never to a desktop use case","High swap usage means the CPU is defective"],c:0,
+  ex:"When physical RAM is exhausted, the system falls back to disk-backed swap space. Because disk is orders of magnitude slower than RAM, heavy swap activity produces exactly the kind of sluggishness people misattribute to CPU speed."},
+ {q:"Why does the Build Order recommend deliberately breaking the boot and repairing it from rescue media, rather than only reading about the procedure?",
+  o:["Practicing the actual chroot-repair procedure before you need it for real is the point — a recovery plan only helps if you've rehearsed it","It's purely a formality with no practical value","Rescue media only works if you've broken the system deliberately first","This step is optional and rarely relevant in practice"],c:0,
+  ex:"A recovery plan you've never actually executed is a plan you might fumble under real pressure. Deliberately breaking and repairing boot in a controlled setting builds the muscle memory the Common Mistakes list explicitly warns you'll need."}
+];
+
+/* Key terms — pulled from the bolded terms across the four lessons above. */
+const KEY_TERMS = [
+  ["Lightweight distro", "Debian minimal, Xubuntu (XFCE), Alpine (musl+busybox) — chosen deliberately for constrained hardware, not by default habit."],
+  ["Desktop environment RAM cost", "A full DE (GNOME/KDE) can idle at 1GB+ RAM; XFCE or a bare window manager uses a fraction of that."],
+  ["File permissions (rwx)", "Owner/group/other access, represented as octal (755) or symbolic (rwxr-xr-x) notation."],
+  ["chmod / chown", "chmod changes permissions; chown changes ownership — two distinct concepts."],
+  ["Root vs sudo", "Routine work as a regular user, with sudo elevation only for the specific commands that need it — not blanket root access."],
+  ["ps aux", "Lists every currently running process."],
+  ["SIGTERM vs SIGKILL", "Plain kill sends SIGTERM (catchable, allows cleanup); kill -9 sends SIGKILL (immediate, no cleanup chance)."],
+  ["systemd unit files & targets", "Define what starts at boot and in what order."],
+  ["systemctl list-unit-files --state=enabled", "Audits every service currently set to auto-start at boot."],
+  ["disable --now", "One command that both prevents future auto-start and stops a service immediately."],
+  ["top / htop", "Real-time CPU and memory usage per process."],
+  ["df -h", "Disk space usage per filesystem, human-readable."],
+  ["journalctl", "systemd's centralized log reader — the tool for 'why did something fail.'"],
+  ["Swap / memory pressure", "Disk used as overflow RAM when physical memory runs out — dramatically slower, often the real cause of sluggishness."],
+  ["apt --fix-broken install", "Recovers a system left in a half-configured state by an interrupted package install."],
+  ["Rescue/live media", "Bootable media used to access and repair a system that won't boot normally."],
+  ["chroot repair", "Mounting a broken system's filesystem and entering it to fix configuration from outside its own boot process."],
+  ["No recovery plan trap", "Always have rescue media ready and a rehearsed repair procedure before deliberately experimenting."]
+];
+
+const STATE_KEY = 'chainK_linuxOnOldHardware_v1';
+function loadState(){
+  try{ const raw = localStorage.getItem(STATE_KEY); return raw ? JSON.parse(raw) : null; }
+  catch(e){ return null; }
+}
+function saveState(){
+  try{
+    localStorage.setItem(STATE_KEY, JSON.stringify({
+      answered, quizScore: score, quizDone: [...done], fcKnown: [...fcKnown],
+      popLastScore, popLastTotal, popAttemptsCount, matchBestAttempts
+    }));
+  }catch(e){ /* storage unavailable — progress just won't persist this session */ }
+}
+const SAVED = loadState();
+
+let idx = 0;
+const answered = SAVED && Array.isArray(SAVED.answered) && SAVED.answered.length === LESSONS.length
+  ? SAVED.answered.slice() : new Array(LESSONS.length).fill(false);
+
+function videoCard(l){
+  return `<a class="video-card" href="${l.url}" target="_blank" rel="noopener">
+    <span class="video-card-thumb" style="background-image:url('https://img.youtube.com/vi/${l.vid}/hqdefault.jpg')">
+      <span class="video-card-play">&#9658;</span></span>
+    <span class="video-card-info"><b>${l.label}</b><span>${l.channel} &middot; opens on YouTube</span></span></a>`;
+}
+function renderLinks(links){
+  if(!links || !links.length) return '';
+  const rows = links.map(l => l.type === 'watch'
+    ? videoCard(l)
+    : `<div><span class="kind">${l.type}</span><a href="${l.url}" target="_blank" rel="noopener">${l.label}</a></div>`).join('');
+  return `<div class="links"><h4 style="margin:0 0 6px;font-size:14px;color:var(--accent)">Continue learning</h4>${rows}</div>`;
+}
+function renderQuick(i){
+  const q = LESSONS[i].quick;
+  if(!q) return '';
+  const isDone = answered[i];
+  return `<div class="qc"><h4>Quick check</h4><p style="margin:0 0 6px;font-size:14px">${q.q}</p>
+    <div id="qcopts">${q.choices.map((c,ci)=>`<button class="opt ${isDone && ci===q.a?'correct':''}" data-ci="${ci}" ${isDone?'disabled':''}>${c}</button>`).join('')}</div>
+    <div class="explain" id="qcex" style="${isDone?'display:block':''}">${isDone?q.ex:''}</div></div>`;
+}
+
+const TOOLS = ['Flashcards','Match','Pop Quiz','Cheat Sheet','Terminal Simulator','Report Card'];
+function pillsHTML(){
+  const lessonPills = LESSONS.map((l,i)=>
+    `<button class="pill ${i===idx?'active':''} ${answered[i]?'done':''}" data-i="${i}">${i+1}. ${l.short}</button>`).join('');
+  const quizPill = `<button class="pill ${idx===LESSONS.length?'active':''}" data-i="${LESSONS.length}">Quiz</button>`;
+  const toolPills = TOOLS.map((t,ti)=>{
+    const i = LESSONS.length + 1 + ti;
+    return `<button class="pill tool ${i===idx?'active':''}" data-i="${i}">${t}</button>`;
+  }).join('');
+  return lessonPills + quizPill + toolPills;
+}
+function render(){
+  document.getElementById('pills').innerHTML = pillsHTML();
+  const isQuiz = idx === LESSONS.length;
+  const isTool = idx > LESSONS.length;
+  document.querySelector('main').style.display = (isQuiz || isTool) ? 'none' : 'grid';
+  document.getElementById('quizWrap').style.display = isQuiz ? 'block' : 'none';
+  document.getElementById('toolWrap').style.display = isTool ? 'block' : 'none';
+  document.getElementById('nav').style.display = isTool ? 'none' : 'flex';
+  if(isTool){ renderTool(idx - LESSONS.length - 1); return; }
+  if(isQuiz){ document.getElementById('counter').textContent = 'Final quiz'; renderQuiz(); syncNav(); return; }
+  const L = LESSONS[idx];
+  document.getElementById('lesson').innerHTML =
+    `<h2>${idx+1}. ${L.title}</h2>${L.body}${renderLinks(L.links)}${renderQuick(idx)}`;
+  document.getElementById('practice').innerHTML = L.practice;
+  document.getElementById('counter').textContent = `Lesson ${idx+1} of ${LESSONS.length}`;
+  const opts = document.getElementById('qcopts');
+  if(opts) opts.addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if(!b || b.disabled) return;
+    const q = LESSONS[idx].quick, pick = +b.dataset.ci;
+    [...opts.children].forEach((el,ci)=>{ el.disabled = true;
+      if(ci===q.a) el.classList.add('correct'); else if(ci===pick) el.classList.add('wrong'); });
+    const ex = document.getElementById('qcex'); ex.textContent = q.ex; ex.style.display='block';
+    answered[idx] = true;
+    saveState();
+    syncNav(); render2Pills();
+  });
+  syncNav();
+}
+function render2Pills(){
+  document.querySelectorAll('.pill').forEach((p,i)=>{ if(answered[i]) p.classList.add('done'); });
+}
+function syncNav(){
+  document.getElementById('prev').disabled = idx === 0;
+  const n = document.getElementById('next');
+  const gated = idx < LESSONS.length && !answered[idx];
+  n.disabled = idx > LESSONS.length - 1 || gated;
+  n.textContent = gated ? 'Answer the quick check to continue' : 'Next →';
+}
+
+let score = SAVED && Number.isFinite(SAVED.quizScore) ? SAVED.quizScore : 0;
+let done = new Set(SAVED && Array.isArray(SAVED.quizDone) ? SAVED.quizDone : []);
+function renderQuiz(){
+  document.getElementById('total').textContent = QUIZ.length;
+  document.getElementById('quiz').innerHTML = QUIZ.map((it,qi)=>{
+    const isDone = done.has(qi);
+    return `<div class="q"><p>${qi+1}. ${it.q}</p>
+      <div data-q="${qi}">${it.o.map((o,oi)=>`<button class="opt ${isDone && oi===it.c?'correct':''}" data-q="${qi}" data-o="${oi}" ${isDone?'disabled':''}>${o}</button>`).join('')}</div>
+      <div class="explain" id="qex${qi}" style="${isDone?'display:block':''}">${isDone?it.ex:''}</div></div>`;
+  }).join('');
+  document.getElementById('score').textContent = score;
+}
+document.getElementById('quiz').addEventListener('click', e => {
+  const b = e.target.closest('.opt'); if(!b || b.disabled) return;
+  const qi = +b.dataset.q, oi = +b.dataset.o, it = QUIZ[qi];
+  if(done.has(qi)) return; done.add(qi);
+  b.parentElement.querySelectorAll('.opt').forEach((el,i)=>{ el.disabled = true;
+    if(i===it.c) el.classList.add('correct'); else if(i===oi) el.classList.add('wrong'); });
+  const ex = document.getElementById('qex'+qi); ex.textContent = it.ex; ex.style.display='block';
+  if(oi===it.c){ score++; document.getElementById('score').textContent = score; }
+  saveState();
+});
+
+function shuffled(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
+  return a;
+}
+function renderTool(view){
+  if(view===0) return renderFlash();
+  if(view===1) return renderMatch();
+  if(view===2) return renderPop();
+  if(view===3) return renderCheat();
+  if(view===4) return renderTerminal();
+  if(view===5) return renderReportCard();
+}
+
+let fcIdx = 0;
+const fcKnown = new Set(SAVED && Array.isArray(SAVED.fcKnown) ? SAVED.fcKnown : []);
+function renderFlash(){
+  const t = KEY_TERMS[fcIdx];
+  document.getElementById('toolWrap').innerHTML = `
+    <h3 style="color:var(--accent);margin-top:0">Flashcards</h3>
+    <p style="color:var(--muted);font-size:13px">Click a card to flip it. ${fcKnown.size} / ${KEY_TERMS.length} marked known.</p>
+    <div class="flash-stage"><div class="flash-card" id="flashCard">
+      <div class="flash-face flash-front">${t[0]}</div>
+      <div class="flash-face flash-back">${t[1]}</div>
+    </div></div>
+    <div class="flash-controls">
+      <button class="ghost" id="fcPrev">&larr; Prev</button>
+      <span class="counter" style="margin:0 6px">${fcIdx+1} / ${KEY_TERMS.length}</span>
+      <button class="ghost" id="fcKnow">${fcKnown.has(fcIdx) ? '✓ Known' : 'Mark known'}</button>
+      <button class="ghost" id="fcNext">Next &rarr;</button>
+    </div>`;
+  document.getElementById('flashCard').onclick = () => document.getElementById('flashCard').classList.toggle('flipped');
+  document.getElementById('fcPrev').onclick = () => { fcIdx = (fcIdx - 1 + KEY_TERMS.length) % KEY_TERMS.length; renderFlash(); };
+  document.getElementById('fcNext').onclick = () => { fcIdx = (fcIdx + 1) % KEY_TERMS.length; renderFlash(); };
+  document.getElementById('fcKnow').onclick = () => {
+    if(fcKnown.has(fcIdx)) fcKnown.delete(fcIdx); else fcKnown.add(fcIdx);
+    saveState(); renderFlash();
+  };
+}
+
+let matchPairs = [], matchTermOrder = [], matchDefOrder = [], matchSel = null, matchMatched = new Set(), matchAttempts = 0;
+let matchBestAttempts = SAVED && Number.isFinite(SAVED.matchBestAttempts) ? SAVED.matchBestAttempts : null;
+function newMatchRound(){
+  const n = Math.min(8, KEY_TERMS.length);
+  const idxs = shuffled([...Array(KEY_TERMS.length).keys()]).slice(0, n);
+  matchPairs = idxs.map(i => ({ key:i, term:KEY_TERMS[i][0], def:KEY_TERMS[i][1] }));
+  matchTermOrder = shuffled(matchPairs);
+  matchDefOrder = shuffled(matchPairs);
+  matchSel = null; matchMatched = new Set(); matchAttempts = 0;
+}
+function matchBtn(p, side){
+  const isMatched = matchMatched.has(p.key);
+  const isSel = matchSel && matchSel.key === p.key && matchSel.side === side;
+  const label = side === 'term' ? p.term : p.def;
+  return `<button class="match-btn ${isMatched?'matched':''} ${isSel?'sel':''}" data-key="${p.key}" data-side="${side}" ${isMatched?'disabled':''}>${label}</button>`;
+}
+function matchStatusText(){
+  if(matchMatched.size === matchPairs.length) return `Solved in ${matchAttempts} attempts!`;
+  return `Match each term to its definition. Attempts: ${matchAttempts}`;
+}
+function renderMatch(){
+  if(!matchPairs.length) newMatchRound();
+  document.getElementById('toolWrap').innerHTML = `
+    <h3 style="color:var(--accent);margin-top:0">Match</h3>
+    <p style="color:var(--muted);font-size:13px" id="matchStatus">${matchStatusText()}</p>
+    <div class="match-grid">
+      <div class="match-col">${matchTermOrder.map(p => matchBtn(p,'term')).join('')}</div>
+      <div class="match-col">${matchDefOrder.map(p => matchBtn(p,'def')).join('')}</div>
+    </div>
+    <button class="ghost" id="matchNew" style="margin-top:14px">New round</button>`;
+  document.querySelectorAll('.match-btn').forEach(b => b.addEventListener('click', onMatchClick));
+  document.getElementById('matchNew').onclick = () => { newMatchRound(); renderMatch(); };
+}
+function onMatchClick(e){
+  const b = e.currentTarget;
+  const key = +b.dataset.key, side = b.dataset.side;
+  if(matchMatched.has(key)) return;
+  if(!matchSel || matchSel.side === side){ matchSel = { key, side }; renderMatch(); return; }
+  matchAttempts++;
+  if(matchSel.key === key){
+    matchMatched.add(key);
+    matchSel = null;
+    if(matchMatched.size === matchPairs.length){
+      if(matchBestAttempts === null || matchAttempts < matchBestAttempts) matchBestAttempts = matchAttempts;
+      saveState();
+    }
+    renderMatch();
+  } else {
+    b.classList.add('wrong');
+    const status = document.getElementById('matchStatus');
+    if(status) status.textContent = `Not quite. Attempts: ${matchAttempts}`;
+    setTimeout(() => { matchSel = null; renderMatch(); }, 500);
+  }
+}
+
+function popPool(){
+  const fromLessons = LESSONS.filter(l => l.quick).map(l => ({ q:l.quick.q, opts:l.quick.choices, correct:l.quick.a, ex:l.quick.ex }));
+  const fromQuiz = QUIZ.map(q => ({ q:q.q, opts:q.o, correct:q.c, ex:q.ex }));
+  return [...fromLessons, ...fromQuiz];
+}
+let popSet = [], popIdx = 0, popScore = 0, popDone = false;
+let popLastScore = SAVED && Number.isFinite(SAVED.popLastScore) ? SAVED.popLastScore : null;
+let popLastTotal = SAVED && Number.isFinite(SAVED.popLastTotal) ? SAVED.popLastTotal : null;
+let popAttemptsCount = SAVED && Number.isFinite(SAVED.popAttemptsCount) ? SAVED.popAttemptsCount : 0;
+function newPop(){
+  const pool = shuffled(popPool());
+  popSet = pool.slice(0, Math.min(5, pool.length));
+  popIdx = 0; popScore = 0; popDone = false;
+}
+function renderPop(){
+  if(!popSet.length) newPop();
+  if(popDone){
+    document.getElementById('toolWrap').innerHTML = `
+      <h3 style="color:var(--accent);margin-top:0">Pop Quiz</h3>
+      <p>Score: <b>${popScore} / ${popSet.length}</b></p>
+      <button class="ghost" id="popAgain">Try another 5</button>`;
+    document.getElementById('popAgain').onclick = () => { newPop(); renderPop(); };
+    return;
+  }
+  const it = popSet[popIdx];
+  document.getElementById('toolWrap').innerHTML = `
+    <h3 style="color:var(--accent);margin-top:0">Pop Quiz</h3>
+    <p style="color:var(--muted);font-size:13px">Question ${popIdx+1} of ${popSet.length} &middot; Score so far: ${popScore}</p>
+    <div class="qc"><p style="font-weight:600;font-size:14px;margin:0 0 6px">${it.q}</p>
+      <div id="popOpts">${it.opts.map((o,oi)=>`<button class="opt" data-oi="${oi}">${o}</button>`).join('')}</div>
+      <div class="explain" id="popEx"></div></div>
+    <button class="ghost" id="popNext" style="margin-top:12px;display:none">Next &rarr;</button>`;
+  document.getElementById('popOpts').addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if(!b || b.disabled) return;
+    const oi = +b.dataset.oi;
+    [...document.getElementById('popOpts').children].forEach((el,i) => {
+      el.disabled = true;
+      if(i===it.correct) el.classList.add('correct'); else if(i===oi) el.classList.add('wrong');
+    });
+    if(oi === it.correct) popScore++;
+    const ex = document.getElementById('popEx'); ex.textContent = it.ex; ex.style.display = 'block';
+    document.getElementById('popNext').style.display = 'inline-block';
+  });
+  document.getElementById('popNext').onclick = () => {
+    popIdx++;
+    if(popIdx >= popSet.length){
+      popDone = true;
+      popLastScore = popScore; popLastTotal = popSet.length; popAttemptsCount++;
+      saveState();
+    }
+    renderPop();
+  };
+}
+
+const CHEATSHEET = `
+  <h3 style="color:var(--accent);margin-top:0">Cheat Sheet</h3>
+  <table class="cheat">
+    <tr><th>Task</th><th>Command / rule</th></tr>
+    <tr><td>List enabled boot services</td><td><code>systemctl list-unit-files --state=enabled</code></td></tr>
+    <tr><td>Disable a service now + at boot</td><td><code>systemctl disable --now &lt;service&gt;</code></td></tr>
+    <tr><td>List running processes</td><td><code>ps aux</code></td></tr>
+    <tr><td>Graceful vs forceful kill</td><td><code>kill &lt;pid&gt;</code> (SIGTERM) vs <code>kill -9 &lt;pid&gt;</code> (SIGKILL)</td></tr>
+    <tr><td>Change permissions / ownership</td><td><code>chmod</code> / <code>chown</code></td></tr>
+    <tr><td>Real-time CPU/RAM per process</td><td><code>top</code> / <code>htop</code></td></tr>
+    <tr><td>Disk space per filesystem</td><td><code>df -h</code></td></tr>
+    <tr><td>Why did something fail?</td><td><code>journalctl</code></td></tr>
+    <tr><td>Machine feels slow, high swap</td><td>Memory pressure — disk-backed swap is far slower than RAM</td></tr>
+    <tr><td>Fix a broken package install</td><td><code>apt --fix-broken install</code></td></tr>
+    <tr><td>Repair a broken boot</td><td>Rescue media → <code>mount</code> root partition → <code>chroot</code> in → fix → <code>exit</code> → <code>reboot</code></td></tr>
+  </table>
+  <p style="color:var(--muted);font-size:12px;margin-top:10px">Full lesson content covers the reasoning
+     behind each row — this page is for last-minute recall, not first-time learning.</p>`;
+function renderCheat(){ document.getElementById('toolWrap').innerHTML = CHEATSHEET; }
+
+/* Terminal Simulator — same pattern as Raspberry-Pi-Tinkering and
+   Cyberdeck-Cellular-And-Media, this project's own scenarios: auditing/
+   disabling boot services, diagnosing memory pressure, and chroot-based
+   boot recovery. Reuses `freeform` step support for the "edit fstab" step. */
+const TERM_SCENARIOS = [
+  {
+    name: "Scenario 1 — Audit & disable unnecessary boot services",
+    steps: [
+      { expect: ["systemctl list-unit-files --state=enabled"], hint:"List everything set to auto-start: systemctl list-unit-files --state=enabled",
+        output:["bluetooth.service    enabled","cups.service         enabled","ssh.service          enabled","cron.service          enabled","(showing services relevant to this audit)"] },
+      { expect: ["systemctl disable --now bluetooth.service"], hint:"This machine has no Bluetooth hardware — disable it: systemctl disable --now bluetooth.service",
+        output:["Removed '/etc/systemd/system/multi-user.target.wants/bluetooth.service'.","Bluetooth stopped."] },
+      { expect: ["systemctl disable --now cups.service"], hint:"No printer is ever attached — disable printing support: systemctl disable --now cups.service",
+        output:["Removed '/etc/systemd/system/printer.target.wants/cups.service'.","Printing service stopped."] }
+    ]
+  },
+  {
+    name: "Scenario 2 — Diagnose memory pressure",
+    steps: [
+      { expect: ["top","htop"], hint:"Check real-time CPU/memory usage: top", output:["%MEM: 94.2 used  |  Swap: 812M used of 1024M","PID 1842  indexer.service   38.1% MEM","PID 1  systemd   0.4% MEM"] },
+      { expect: ["free -h"], hint:"Confirm swap pressure: free -h", output:["              total   used   free","Mem:          2.0Gi  1.9Gi  0.1Gi","Swap:         1.0Gi  812Mi  212Mi"] },
+      { expect: ["systemctl list-units --type=service --state=running"], hint:"Find what's actually running: systemctl list-units --type=service --state=running", output:["indexer.service    running   (38.1% MEM — the culprit)","ssh.service        running","cron.service       running"] },
+      { expect: ["systemctl stop indexer.service"], hint:"Stop the heavy service: systemctl stop indexer.service", output:["indexer.service stopped.","Swap usage dropping — memory pressure relieved."] }
+    ]
+  },
+  {
+    name: "Scenario 3 — Recover a broken boot",
+    steps: [
+      { expect: ["mount /dev/sda1 /mnt"], hint:"Booted from rescue media. Mount the broken system's root partition: mount /dev/sda1 /mnt", output:["Mounted /dev/sda1 at /mnt."] },
+      { expect: ["chroot /mnt"], hint:"Enter the broken system's filesystem: chroot /mnt", output:["Now operating inside the mounted system (chroot)."] },
+      { freeform:true, hint:"Fix the broken /etc/fstab entry — type anything representing the edit, this step is freeform", output:["/etc/fstab corrected — removed the entry for the missing drive."] },
+      { expect: ["exit"], hint:"Leave the chroot environment: exit", output:["Exited chroot."] },
+      { expect: ["reboot"], hint:"Reboot normally: reboot", output:["Rebooting...","System boots successfully."] }
+    ]
+  }
+];
+let termScenario = 0, termStep = 0, termLog = [];
+function termReset(){ termStep = 0; termLog = [`Welcome to ${TERM_SCENARIOS[termScenario].name}. Type the command for step 1.`]; }
+function renderTerminal(){
+  if(!termLog.length) termReset();
+  const scenario = TERM_SCENARIOS[termScenario];
+  const done = termStep >= scenario.steps.length;
+  document.getElementById('toolWrap').innerHTML = `
+    <h3 style="color:var(--accent);margin-top:0">Terminal Simulator</h3>
+    <p style="color:var(--muted);font-size:13px">Practice the actual command syntax before you run it on
+       real hardware. Not a real shell — a scripted sequence checking you against the expected command
+       at each step.</p>
+    <div class="pills" style="padding:0;border:0;margin:10px 0">
+      ${TERM_SCENARIOS.map((s,i)=>`<button class="pill ${i===termScenario?'active':''}" data-scn="${i}">${s.name}</button>`).join('')}
+    </div>
+    <div class="term-wrap">
+      <div class="term-log" id="termLog">${termLog.map(l=>`<div class="term-line ${l.cls||'out'}">${l.text||l}</div>`).join('')}</div>
+      <div class="term-input-row">
+        <span>$</span>
+        <input id="termInput" ${done?'disabled placeholder="scenario complete — pick a new one above"':'placeholder="type the command for this step"'} autocomplete="off"/>
+        <button class="ghost" id="termHint" style="margin-left:8px" ${done?'disabled':''}>Hint</button>
+      </div>
+    </div>`;
+  document.querySelectorAll('[data-scn]').forEach(b => b.onclick = () => { termScenario = +b.dataset.scn; termReset(); renderTerminal(); });
+  const input = document.getElementById('termInput');
+  const log = document.getElementById('termLog');
+  function scrollLog(){ log.scrollTop = log.scrollHeight; }
+  scrollLog();
+  if(input){
+    input.focus();
+    input.addEventListener('keydown', e => {
+      if(e.key !== 'Enter' || !input.value.trim()) return;
+      const typed = input.value.trim();
+      termLog.push({ text: typed, cls:'cmd' });
+      const step = scenario.steps[termStep];
+      const matched = step.freeform ? true : step.expect.some(exp => typed.toLowerCase() === exp.toLowerCase());
+      if(matched){
+        step.output.forEach(o => termLog.push({ text:o, cls:'out' }));
+        termStep++;
+        if(termStep >= scenario.steps.length){
+          termLog.push({ text:`✓ ${scenario.name} complete.`, cls:'ok' });
+        } else {
+          termLog.push({ text:`✓ correct — step ${termStep+1} of ${scenario.steps.length}`, cls:'ok' });
+        }
+      } else {
+        termLog.push({ text:"not quite what's expected here — click Hint if you're stuck", cls:'hint' });
+      }
+      input.value = '';
+      renderTerminal();
+    });
+    document.getElementById('termHint').onclick = () => {
+      const step = scenario.steps[termStep];
+      termLog.push({ text:`Hint: ${step.hint}`, cls:'hint' });
+      renderTerminal();
+    };
+  }
+}
+
+function letterGrade(pct){
+  if(pct === null) return { text:'—', cls:'grade-dash' };
+  if(pct >= 90) return { text:'A', cls:'grade-A' };
+  if(pct >= 80) return { text:'B', cls:'grade-B' };
+  if(pct >= 70) return { text:'C', cls:'grade-C' };
+  if(pct >= 60) return { text:'D', cls:'grade-D' };
+  return { text:'F', cls:'grade-F' };
+}
+function renderReportCard(){
+  const lessonsDone = answered.filter(Boolean).length;
+  const quizPct = QUIZ.length ? Math.round((score / QUIZ.length) * 100) : null;
+  const quizAttempted = done.size > 0;
+  const grade = letterGrade(quizAttempted ? quizPct : null);
+  const overallItems = lessonsDone + (quizAttempted ? 1 : 0);
+  const overallTotal = LESSONS.length + 1;
+  const overallPct = Math.round((overallItems / overallTotal) * 100);
+  const now = new Date();
+  document.getElementById('toolWrap').innerHTML = `
+    <div class="report-card">
+      <h3 style="color:var(--accent);margin-top:0">Report Card</h3>
+      <p style="color:var(--muted);font-size:12px;margin-top:-6px">Linux On Old Hardware &middot; generated ${now.toLocaleDateString()} ${now.toLocaleTimeString()}</p>
+      <div class="report-overall">
+        <span class="big ${grade.cls}">${grade.text}</span>
+        <span style="color:var(--muted);font-size:13px">Final quiz grade${quizAttempted ? '' : ' (not yet taken)'}</span>
+      </div>
+      <h4>Lessons</h4>
+      <div class="report-row"><span>Quick checks completed</span><span class="grade">${lessonsDone} / ${LESSONS.length}</span></div>
+      <h4>Final Quiz</h4>
+      <div class="report-row"><span>Score</span><span class="grade">${quizAttempted ? `${score} / ${QUIZ.length} (${quizPct}%)` : 'Not attempted'}</span></div>
+      <h4>Pop Quiz</h4>
+      <div class="report-row"><span>Most recent 5-question run</span><span class="grade">${popLastScore !== null ? `${popLastScore} / ${popLastTotal}` : 'Not attempted'}</span></div>
+      <div class="report-row"><span>Runs completed</span><span class="grade">${popAttemptsCount}</span></div>
+      <h4>Flashcards</h4>
+      <div class="report-row"><span>Terms marked known</span><span class="grade">${fcKnown.size} / ${KEY_TERMS.length}</span></div>
+      <h4>Match Game</h4>
+      <div class="report-row"><span>Best round (fewest attempts)</span><span class="grade">${matchBestAttempts !== null ? matchBestAttempts : 'Not completed'}</span></div>
+      <h4>Overall</h4>
+      <div class="report-row"><span>Lessons + quiz completed</span><span class="grade">${overallItems} / ${overallTotal} (${overallPct}%)</span></div>
+      <button class="ghost" id="printBtn">🖨️ Print / Save as PDF</button>
+      <p style="color:var(--muted);font-size:11px;margin-top:8px">In the print dialog, choose <b>Save as PDF</b> and
+         save it into this project's <code>docs/</code> folder to keep a dated record.</p>
+    </div>`;
+  document.getElementById('printBtn').onclick = () => window.print();
+}
+
+document.getElementById('pills').addEventListener('click', e => {
+  const p = e.target.closest('.pill'); if(!p) return; idx = +p.dataset.i; render();
+});
+document.getElementById('prev').onclick = () => { if(idx>0){ idx--; render(); } };
+document.getElementById('next').onclick = () => { if(idx<LESSONS.length){ idx++; render(); } };
+render();
+</script>
+</body></html>
